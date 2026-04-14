@@ -4,12 +4,20 @@ from app.api.routes import gateway, bank, mbbank, seabank, tpbank
 from app.core.config import settings
 
 
-app = FastAPI(
-    title=settings.PROJECT_NAME,
-    version="1.0.0",
-    description="2Tech Gateway API - Điểm vào trung tâm cho hệ thống microservices",
-    openapi_url=f"/{settings.API_V1_STR}/openapi.json",
-)
+app_kwargs = {
+    "title": settings.PROJECT_NAME,
+    "version": "1.0.0",
+    "description": "2Tech Gateway API - Điểm vào trung tâm cho hệ thống microservices",
+}
+
+if settings.ENVIRONMENT == "production":
+    app_kwargs["openapi_url"] = None
+    app_kwargs["docs_url"] = None
+    app_kwargs["redoc_url"] = None
+else:
+    app_kwargs["openapi_url"] = f"/{settings.API_V1_STR}/openapi.json"
+
+app = FastAPI(**app_kwargs)
 
 # CORS configuration
 if settings.BACKEND_CORS_ORIGINS:

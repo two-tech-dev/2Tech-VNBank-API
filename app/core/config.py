@@ -5,6 +5,7 @@ from pydantic import AnyHttpUrl, field_validator
 class Settings(BaseSettings):
     PROJECT_NAME: str = "2Tech Gateway API"
     API_V1_STR: str = "api/v1"
+    ENVIRONMENT: str = "development"
 
     # Danh sách các domain được phép truy cập (CORS)
     BACKEND_CORS_ORIGINS: list[AnyHttpUrl] = []
