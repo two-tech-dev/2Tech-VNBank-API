@@ -1,0 +1,23 @@
+[project]
+name = "2tech-gateway-api"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "cryptography>=46.0.6",
+    "fastapi[standard]>=0.135.2",
+    "httpx>=0.28.1",
+    "mbbank-lib>=0.3.0",
+    "motor>=3.7.1",
+    "pydantic-settings>=2.13.1",
+    "pyjwt>=2.12.1",
+    "uvicorn>=0.42.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
