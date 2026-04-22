@@ -1,5 +1,5 @@
 import datetime
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Body
 from app.core.security import verify_token, verify_admin_token, create_token
 from app.core.database import mbbank_accounts_collection
 from app.services.mbbank_service import MBBankService
@@ -184,3 +184,24 @@ async def delete_mbbank_account(
         raise HTTPException(status_code=404, detail="Không tìm thấy tài khoản để xóa.")
 
     return {"message": f"Đã xóa tài khoản {account_no} khỏi hệ thống."}
+
+
+# ─────────────────────────────────────────────────
+# DELETE /api/v1/bank/mbbank/admin-delete
+# ─────────────────────────────────────────────────
+@router.delete("/admin-delete")
+async def admin_delete_mbbank_account(
+    accountNo: str = Body(..., embed=True),
+    _admin: str = Depends(verify_admin_token),
+):
+    """
+    Xóa tài khoản MB Bank khỏi hệ thống (yêu cầu Admin token).
+    Dùng cho payment-gateway-rest khi cần xóa tài khoản mà không cần JWT của bank.
+    """
+    collection = mbbank_accounts_collection()
+    result = await collection.delete_one({"accountNo": accountNo})
+
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Không tìm thấy tài khoản để xóa.")
+
+    return {"message": f"Đã xóa tài khoản MB Bank {accountNo} khỏi hệ thống (admin)."}

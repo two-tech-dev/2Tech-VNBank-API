@@ -11,7 +11,7 @@ TPBank API Routes
 import datetime
 import logging
 from bson import ObjectId
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Body
 from app.core.security import verify_token, verify_admin_token, create_token
 from app.core.database import tpbank_accounts_collection, tpbank_pending_collection
 from app.services.tpbank_service import TPBankService
@@ -354,3 +354,24 @@ async def delete_tpbank_account(
         raise HTTPException(404, "Không tìm thấy tài khoản để xóa.")
 
     return {"message": f"Đã xóa tài khoản TPBank {account_no} khỏi hệ thống."}
+
+
+# ─────────────────────────────────────────────────
+# DELETE /admin-delete
+# ─────────────────────────────────────────────────
+@router.delete("/admin-delete")
+async def admin_delete_tpbank_account(
+    accountNo: str = Body(..., embed=True),
+    _admin: str = Depends(verify_admin_token),
+):
+    """
+    Xóa tài khoản TPBank khỏi hệ thống (yêu cầu Admin token).
+    Dùng cho payment-gateway-rest khi cần xóa tài khoản mà không cần JWT của bank.
+    """
+    collection = tpbank_accounts_collection()
+    result = await collection.delete_one({"accountNo": accountNo})
+
+    if result.deleted_count == 0:
+        raise HTTPException(404, "Không tìm thấy tài khoản để xóa.")
+
+    return {"message": f"Đã xóa tài khoản TPBank {accountNo} khỏi hệ thống (admin)."}

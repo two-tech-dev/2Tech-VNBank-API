@@ -10,6 +10,7 @@ security_scheme = HTTPBearer(auto_error=False)
 def create_token(data: dict) -> str:
     """
     Tạo JWT token từ payload data.
+    Token không có thời hạn (không bao giờ hết hạn).
 
     Args:
         data: Dữ liệu cần encode vào token.
@@ -18,10 +19,7 @@ def create_token(data: dict) -> str:
         JWT token string.
     """
     payload = data.copy()
-    expire = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(
-        hours=settings.JWT_EXPIRATION_HOURS
-    )
-    payload.update({"exp": expire})
+    # Không thêm "exp" claim → token không bao giờ hết hạn
     return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
 
 

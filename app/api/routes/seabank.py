@@ -1,5 +1,5 @@
 import datetime
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Body
 from app.core.security import verify_token, verify_admin_token, create_token
 from app.core.database import seabank_accounts_collection
 from app.services.seabank_service import SeABankService
@@ -197,3 +197,24 @@ async def delete_seabank_account(
         raise HTTPException(status_code=404, detail="Không tìm thấy tài khoản để xóa.")
 
     return {"message": f"Đã xóa tài khoản SeABank {account_no} khỏi hệ thống."}
+
+
+# ─────────────────────────────────────────────────
+# DELETE /api/v1/bank/seabank/admin-delete
+# ─────────────────────────────────────────────────
+@router.delete("/admin-delete")
+async def admin_delete_seabank_account(
+    accountNo: str = Body(..., embed=True),
+    _admin: str = Depends(verify_admin_token),
+):
+    """
+    Xóa tài khoản SeABank khỏi hệ thống (yêu cầu Admin token).
+    Dùng cho payment-gateway-rest khi cần xóa tài khoản mà không cần JWT của bank.
+    """
+    collection = seabank_accounts_collection()
+    result = await collection.delete_one({"accountNo": accountNo})
+
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Không tìm thấy tài khoản để xóa.")
+
+    return {"message": f"Đã xóa tài khoản SeABank {accountNo} khỏi hệ thống (admin)."}
